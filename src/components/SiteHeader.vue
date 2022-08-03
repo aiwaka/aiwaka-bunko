@@ -10,7 +10,7 @@
         <page-link-vue :link-to="'/'">TOP</page-link-vue>
         <template v-if="loggedIn">
           <page-link-vue :link-to="'/contents'">CONTENTS</page-link-vue>
-          <page-link-vue :link-to="'/my-page'">MYPAGE</page-link-vue>
+          <page-link-vue :link-to="'/my-page'">USERPAGE</page-link-vue>
         </template>
         <template v-else>
           <page-link-vue :link-to="'/login'">LOGIN</page-link-vue>
