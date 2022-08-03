@@ -12,8 +12,10 @@ export class DocumentRequest {
   constructor(
     public id: string,
     public uid: string,
-    public type: number,
+    public userName: string, // 冗長だがユーザー名を保持しておく（確認するときの利便性）
+    public requestType: number,
     public target: string,
+    public targetName: string, // 冗長に文書名を保持しておく
     public time: Timestamp,
     public message: string,
     public status: number
@@ -38,6 +40,6 @@ export class DocumentRequest {
     return `${hour}時${minute}分`;
   }
   public getTypeStr(): string {
-    return requestTypeStr[this.type];
+    return requestTypeStr[this.requestType];
   }
 }

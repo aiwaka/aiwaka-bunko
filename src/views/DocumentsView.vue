@@ -96,9 +96,9 @@ import {
 import { DocumentRequest, requestTypeStr } from "@/modules/document-requests";
 import {
   createRequestToFirestore,
-  deleteRequestFromFirestore,
+  deleteRequestInterface,
   getRequestByUserAndTarget,
-  updateRequest,
+  modifyRequestInterface,
 } from "@/composables/request-record-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
 
@@ -146,47 +146,26 @@ export default defineComponent({
       if (newRequestType.value !== 2 && newRequestMessage.value === "") {
         alert("修正依頼または意見を送る場合はメッセージが必須です。");
       }
-      const addedRequest = await createRequestToFirestore(
-        newRequestType.value,
-        props.urlStr,
-        newRequestMessage.value
-      );
-      if (addedRequest) {
-        requestList.value.push(addedRequest);
-        newRequestType.value = 0;
-        newRequestMessage.value = "";
+      if (documentItem.value) {
+        const addedRequest = await createRequestToFirestore(
+          newRequestType.value,
+          props.urlStr,
+          documentItem.value?.title,
+          newRequestMessage.value
+        );
+        if (addedRequest) {
+          requestList.value.push(addedRequest);
+          newRequestType.value = 0;
+          newRequestMessage.value = "";
+        }
       }
     };
 
     const modifyRequest = async (id: string) => {
-      const modifyingReq = requestList.value.find((req) => {
-        return req.id === id;
-      });
-      if (modifyingReq === undefined) {
-        alert("修正できません。");
-        return;
-      }
-      const modifiedMessage = window.prompt(
-        "メッセージを修正してください。",
-        modifyingReq.message
-      );
-      if (modifiedMessage !== null && modifiedMessage !== "") {
-        if (confirm("以下の内容を登録しますか？" + `\n${modifiedMessage}`)) {
-          await updateRequest(id, modifiedMessage);
-          modifyingReq.message = modifiedMessage;
-        }
-      }
+      modifyRequestInterface(id, requestList);
     };
     const deleteRequest = async (id: string) => {
-      if (confirm("削除しますか？")) {
-        await deleteRequestFromFirestore(id);
-        await reloadRequestList();
-      }
-    };
-
-    const reloadRequestList = async () => {
-      requestList.value = [];
-      await getRequestByUserAndTarget(requestList, props.urlStr);
+      deleteRequestInterface(id, requestList);
     };
 
     return {
