@@ -146,15 +146,18 @@ export default defineComponent({
       if (newRequestType.value !== 2 && newRequestMessage.value === "") {
         alert("修正依頼または意見を送る場合はメッセージが必須です。");
       }
-      const addedRequest = await createRequestToFirestore(
-        newRequestType.value,
-        props.urlStr,
-        newRequestMessage.value
-      );
-      if (addedRequest) {
-        requestList.value.push(addedRequest);
-        newRequestType.value = 0;
-        newRequestMessage.value = "";
+      if (documentItem.value) {
+        const addedRequest = await createRequestToFirestore(
+          newRequestType.value,
+          props.urlStr,
+          documentItem.value?.title,
+          newRequestMessage.value
+        );
+        if (addedRequest) {
+          requestList.value.push(addedRequest);
+          newRequestType.value = 0;
+          newRequestMessage.value = "";
+        }
       }
     };
 
