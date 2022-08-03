@@ -115,7 +115,7 @@ export const getRequestByUserAndTarget = async (
 ///////////////
 // update
 ///////////////
-export const updateRequest = async (
+const updateRequest = async (
   requestId: string,
   newMessage: string
 ): Promise<void | null> => {
@@ -126,15 +126,59 @@ export const updateRequest = async (
     message: newMessage,
   });
 };
+/** コンポーネント内でリストから修正するオブジェクトを探して修正する処理をまとめたもの.
+ * 引数を渡すだけの最低限のコードだけで動くようにする.
+ * @param requestId
+ * @param requestList
+ */
+export const modifyRequestInterface = async (
+  requestId: string,
+  requestList: Ref<DocumentRequest[]>
+) => {
+  const modifyingReq = requestList.value.find((req) => {
+    return req.id === requestId;
+  });
+  if (modifyingReq === undefined) {
+    alert("修正できません。");
+    return;
+  }
+  const modifiedMessage = window.prompt(
+    "メッセージを修正してください。",
+    modifyingReq.message
+  );
+  if (modifiedMessage !== null && modifiedMessage !== "") {
+    if (confirm("以下の内容を登録しますか？" + `\n${modifiedMessage}`)) {
+      await updateRequest(requestId, modifiedMessage);
+      modifyingReq.message = modifiedMessage;
+    }
+  }
+};
 
 ///////////////
 // delete
 ///////////////
-export const deleteRequestFromFirestore = async (
+const deleteRequestFromFirestore = async (
   requestId: string
 ): Promise<void | null> => {
   const user = await getCurrentUser();
   const uid = user?.uid;
   if (!uid) return null;
   await deleteDoc(doc(db, "requests", requestId));
+};
+/**
+ * 修正と同様に消去の処理をまとめたもの.
+ * @param requestId
+ * @param requestList
+ */
+export const deleteRequestInterface = async (
+  requestId: string,
+  requestList: Ref<DocumentRequest[]>
+) => {
+  if (confirm("削除しますか？")) {
+    await deleteRequestFromFirestore(requestId);
+    const newList = requestList.value.filter((req) => {
+      return req.id !== requestId;
+    });
+    requestList.value = newList;
+  }
 };
