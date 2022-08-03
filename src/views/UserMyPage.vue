@@ -8,6 +8,7 @@
         v-for="req in requestList"
         :key="req.id"
         :request="req"
+        :show-doc-title="true"
         @modify-request="modifyRequest"
         @delete-request="deleteRequest"
       />

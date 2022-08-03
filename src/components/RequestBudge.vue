@@ -1,19 +1,22 @@
 <template>
   <div class="request-budge" :class="cssClassFromStatus">
+    <div v-if="showDocTitle" class="doc-title">
+      {{ request.targetName }}
+    </div>
     <div class="status-message">
-      <span>{{ $props.request.getTypeStr() }}</span>
-      <span v-if="$props.request.type !== 2">：{{ statusMessage }}</span>
+      <span>{{ request.getTypeStr() }}</span>
+      <span v-if="request.requestType !== 2">：{{ statusMessage }}</span>
     </div>
     <div class="request-message">
-      {{ $props.request.message }}
+      {{ request.message }}
     </div>
     <div class="button-container">
-      <template v-if="$props.request.status === 0">
-        <button @click="modifyRequest" v-if="$props.request.type !== 2">
+      <template v-if="request.status === 0">
+        <button @click="modifyRequest" v-if="request.requestType !== 2">
           修正する
         </button>
       </template>
-      <template v-if="$props.request.status !== 1">
+      <template v-if="request.status !== 1">
         <button @click="deleteRequest">取り消す</button>
       </template>
     </div>
@@ -29,6 +32,10 @@ export default defineComponent({
     request: {
       type: Object as PropType<DocumentRequest>,
       required: true,
+    },
+    showDocTitle: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["delete-request", "modify-request"],
@@ -88,6 +95,11 @@ export default defineComponent({
   }
   &.rejected {
     background-color: rgba($color: rgb(249, 34, 34), $alpha: 0.2);
+  }
+
+  .doc-title {
+    font-weight: 800;
+    font-size: larger;
   }
 
   .status-message {
