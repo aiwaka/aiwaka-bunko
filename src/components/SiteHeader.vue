@@ -8,19 +8,41 @@
     <nav>
       <div class="nav-link-wrapper">
         <page-link-vue :link-to="'/'">TOP</page-link-vue>
-        <page-link-vue :link-to="'/contents'">CONTENTS</page-link-vue>
-        <page-link-vue :link-to="'/login'">LOGIN/LOGOUT</page-link-vue>
+        <template v-if="loggedIn">
+          <page-link-vue :link-to="'/contents'">CONTENTS</page-link-vue>
+          <page-link-vue :link-to="'/my-page'">MYPAGE</page-link-vue>
+        </template>
+        <template v-else>
+          <page-link-vue :link-to="'/login'">LOGIN</page-link-vue>
+          <page-link-vue :link-to="'/register'">REGISTER</page-link-vue>
+        </template>
       </div>
     </nav>
   </header>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { auth } from "@/settings/firebase";
+import { onAuthStateChanged } from "@firebase/auth";
+import { defineComponent, reactive, toRefs } from "vue";
 import PageLinkVue from "./PageLink.vue";
+
+interface State {
+  loggedIn: boolean;
+}
 
 export default defineComponent({
   components: { PageLinkVue },
+
+  setup() {
+    const { loggedIn } = toRefs(reactive<State>({ loggedIn: false }));
+
+    onAuthStateChanged(auth, (user) => {
+      loggedIn.value = !!user;
+    });
+
+    return { loggedIn };
+  },
 });
 </script>
 

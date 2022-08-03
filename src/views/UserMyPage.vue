@@ -1,29 +1,12 @@
 <template>
-  <div class="login-page">
-    <div class="login-form">
-      <h1>ログイン</h1>
-      <fieldset :class="{ 'error-exist': state.errorMessage }">
-        <label for="form-name">email</label>
-        <input
-          id="form-name"
-          type="email"
-          placeholder="email"
-          v-model="state.userEmail"
-        />
-        <label for="form-password">password</label>
-        <input
-          id="form-password"
-          type="password"
-          placeholder="password"
-          v-model="state.password"
-        />
-        <button @click="login">Login</button>
-      </fieldset>
+  <div class="user-mypage">
+    <h1>{{ state.loginUserName }}</h1>
+    <h2></h2>
+    <h2>ログアウト</h2>
+    <div class="login-name-display">
+      {{ state.loginUserName }}としてログインしています。
     </div>
-    <div>
-      登録していない方はこちらから登録してください→
-      <router-link to="/register">登録ページ</router-link>
-    </div>
+    <button @click="logout">Logout</button>
 
     <div v-if="state.errorMessage" class="error-exist error-msg">
       {{ state.errorMessage }}
@@ -32,10 +15,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
+import { defineComponent, onMounted, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/settings/firebase";
+import { getUserName } from "@/composables/user-record-operations";
 
 interface State {
   errorMessage: string;
@@ -56,6 +40,14 @@ export default defineComponent({
     });
     const router = useRouter();
     const route = useRoute();
+
+    onMounted(async () => {
+      const userName = await getUserName();
+      state.loggedIn = !!userName;
+      if (userName !== null) {
+        state.loginUserName = userName;
+      }
+    });
 
     const login = () => {
       signInWithEmailAndPassword(auth, state.userEmail, state.password)
@@ -84,8 +76,19 @@ export default defineComponent({
           }
         });
     };
+    const logout = () => {
+      if (confirm("ログアウトしますか？")) {
+        signOut(auth)
+          .then(() => {
+            router.push("/");
+          })
+          .catch((error) => {
+            state.errorMessage = error.message;
+          });
+      }
+    };
 
-    return { state, login };
+    return { state, login, logout };
   },
 });
 </script>
