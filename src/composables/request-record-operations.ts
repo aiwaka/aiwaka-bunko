@@ -12,7 +12,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db, getCurrentUser } from "@/settings/firebase";
-import { DocumentRequest } from "@/modules/document-requests";
+import {
+  DocumentRequest,
+  makeDocumentRequest,
+} from "@/modules/document-requests";
 import { requestConverter } from "./firestore-converter";
 import { getUserName } from "./user-record-operations";
 
@@ -49,17 +52,7 @@ export const createRequestToFirestore = async (
   };
   await setDoc(newRequestRef, newRequestData);
   // リロードなしで使えるようにする.
-  const newRec = new DocumentRequest(
-    newRequestRef.id,
-    uid,
-    userName,
-    requestType,
-    target,
-    targetName,
-    currentDate,
-    message,
-    0
-  );
+  const newRec = makeDocumentRequest(newRequestRef.id, newRequestData);
   return newRec;
 };
 
@@ -80,20 +73,7 @@ export const getAllRequestByUser = async (
   ).withConverter(requestConverter);
   const querySnapshot = await getDocs(requestsQuery);
   querySnapshot.forEach((doc) => {
-    const docData = doc.data();
-    // TODO: あまりに冗長なので, docDataにidだけつけて新しい構造体を作れるようなメソッドを用意
-    const newReq = new DocumentRequest(
-      doc.id,
-      docData.uid,
-      docData.userName,
-      docData.requestType,
-      docData.target,
-      docData.targetName,
-      docData.time,
-      docData.message,
-      docData.status
-    );
-    requestList.value.push(newReq);
+    requestList.value.push(doc.data());
   });
 };
 
@@ -111,19 +91,7 @@ export const getRequestByUserAndTarget = async (
   ).withConverter(requestConverter);
   const querySnapshot = await getDocs(requestsQuery);
   querySnapshot.forEach((doc) => {
-    const docData = doc.data();
-    const newReq = new DocumentRequest(
-      doc.id,
-      docData.uid,
-      docData.userName,
-      docData.requestType,
-      docData.target,
-      docData.targetName,
-      docData.time,
-      docData.message,
-      docData.status
-    );
-    requestList.value.push(newReq);
+    requestList.value.push(doc.data());
   });
 };
 

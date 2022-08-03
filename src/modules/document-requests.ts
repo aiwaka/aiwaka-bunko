@@ -8,6 +8,38 @@ export const requestTypeStr = [
   "その他",
 ];
 
+interface DocumentRequestWithoutId {
+  uid: string;
+  userName: string;
+  requestType: number;
+  target: string;
+  targetName: string;
+  time: Timestamp;
+  message: string;
+  status: number;
+}
+/**
+ * id以外をすべて含むオブジェクトにidを付け足してDocumentRequestオブジェクトを作成する.
+ * @param id idの指定
+ * @param obj idだけ含まず他の要素はすべて含むオブジェクト
+ */
+export const makeDocumentRequest = (
+  id: string,
+  obj: DocumentRequestWithoutId
+): DocumentRequest => {
+  return new DocumentRequest(
+    id,
+    obj.uid,
+    obj.userName,
+    obj.requestType,
+    obj.target,
+    obj.targetName,
+    obj.time,
+    obj.message,
+    obj.status
+  );
+};
+
 export class DocumentRequest {
   constructor(
     public id: string,

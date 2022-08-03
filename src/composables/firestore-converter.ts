@@ -46,6 +46,7 @@ export const requestConverter = {
     options: SnapshotOptions
   ): DocumentRequest => {
     const data = snapshot.data(options);
+    // ここもmake...関数に置き換えてもよいが, anyで怒られる. 無理やりキャストするのもありか？
     return new DocumentRequest(
       snapshot.id,
       data.uid,
