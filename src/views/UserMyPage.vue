@@ -1,6 +1,7 @@
 <template>
   <div class="user-mypage">
     <h1>{{ loginUserName }}</h1>
+    <!-- TODO: 自分のページにはソート機能がほしいかも -->
     <h2>リクエスト一覧</h2>
     <div class="request-container">
       <request-budge-vue
