@@ -25,12 +25,39 @@ const routes: Array<RouteRecordRaw> = [
     name: "Login",
     component: () => import("../views/LoginPage.vue"),
     meta: { title: "Login", desc: "ログインページ" },
+    beforeEnter: async (_to, _from, next) => {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        next({
+          path: "/my-page",
+        });
+      } else {
+        next();
+      }
+    },
+  },
+  {
+    // pathを/:userId等にして他の人の情報の一部も見られるようにすると面白いかもしれない
+    path: "/my-page",
+    name: "MyPage",
+    component: () => import("../views/UserMyPage.vue"),
+    meta: { title: "MyPage", desc: "ユーザー個人ページ", requiresAuth: true },
   },
   {
     path: "/register",
     name: "Register",
     component: () => import("../views/RegisterPage.vue"),
     meta: { title: "Register", desc: "登録ページ" },
+    beforeEnter: async (_to, _from, next) => {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        next({
+          path: "/my-page",
+        });
+      } else {
+        next();
+      }
+    },
   },
   {
     path: "/contents",

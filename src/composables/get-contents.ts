@@ -2,7 +2,7 @@ import { collection, doc, getDoc, getDocs, query } from "@firebase/firestore";
 import { Ref } from "vue";
 import { db } from "@/settings/firebase";
 import { DocumentContent } from "@/modules/document-content";
-import { documentConverter } from "./document-firebase-converter";
+import { documentConverter } from "./firestore-converter";
 
 export const getAllContents = async (list: Ref<DocumentContent[]>) => {
   // 全件取得
