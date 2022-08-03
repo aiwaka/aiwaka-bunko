@@ -81,6 +81,7 @@ export const getAllRequestByUser = async (
   const querySnapshot = await getDocs(requestsQuery);
   querySnapshot.forEach((doc) => {
     const docData = doc.data();
+    // TODO: あまりに冗長なので, docDataにidだけつけて新しい構造体を作れるようなメソッドを用意
     const newReq = new DocumentRequest(
       doc.id,
       docData.uid,
