@@ -1,81 +1,63 @@
 <template>
   <div class="user-mypage">
-    <h1>{{ state.loginUserName }}</h1>
-    <h2></h2>
-    <h2>ログアウト</h2>
-    <div class="login-name-display">
-      {{ state.loginUserName }}としてログインしています。
+    <h1>{{ loginUserName }}</h1>
+    <h2>リクエスト一覧</h2>
+    <div class="request-container">
+      <request-budge-vue
+        v-for="req in requestList"
+        :key="req.id"
+        :request="req"
+        @modify-request="modifyRequest"
+        @delete-request="deleteRequest"
+      />
     </div>
-    <button @click="logout">Logout</button>
 
-    <div v-if="state.errorMessage" class="error-exist error-msg">
-      {{ state.errorMessage }}
-    </div>
+    <h2>ログアウト</h2>
+    <button @click="logout">Logout</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { defineComponent, onMounted, reactive, toRefs } from "vue";
+import { useRouter } from "vue-router";
+import { signOut } from "firebase/auth";
 import { auth } from "@/settings/firebase";
 import { getUserName } from "@/composables/user-record-operations";
+import { DocumentRequest } from "@/modules/document-requests";
+import {
+  deleteRequestInterface,
+  getAllRequestByUser,
+  modifyRequestInterface,
+} from "@/composables/request-record-operations";
+import RequestBudgeVue from "@/components/RequestBudge.vue";
 
 interface State {
   errorMessage: string;
-  loggedIn: boolean;
   loginUserName: string;
-  password: string;
-  userEmail: string;
+  requestList: DocumentRequest[];
 }
 
 export default defineComponent({
+  components: { RequestBudgeVue },
   setup() {
-    const state = reactive<State>({
-      errorMessage: "",
-      loggedIn: false,
-      loginUserName: "",
-      password: "",
-      userEmail: "",
-    });
+    const { errorMessage, loginUserName, requestList } = toRefs(
+      reactive<State>({
+        errorMessage: "",
+        loginUserName: "",
+        requestList: [],
+      })
+    );
     const router = useRouter();
-    const route = useRoute();
 
     onMounted(async () => {
       const userName = await getUserName();
-      state.loggedIn = !!userName;
-      if (userName !== null) {
-        state.loginUserName = userName;
+      if (userName) {
+        loginUserName.value = userName;
+        // リクエスト情報を取得
+        await getAllRequestByUser(requestList);
       }
     });
 
-    const login = () => {
-      signInWithEmailAndPassword(auth, state.userEmail, state.password)
-        .then(() => {
-          if (route.query.redirect) {
-            const redirect = route.query.redirect;
-            if (typeof redirect === "string") {
-              router.push(redirect);
-            } else {
-              router.push("/");
-            }
-          } else {
-            router.push("/");
-          }
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-
-          if (errorCode === "auth/invalid-email") {
-            state.errorMessage = "メールアドレスが誤っています。";
-          } else if (errorCode === "auth/wrong-password") {
-            state.errorMessage = "パスワードが誤っています。";
-          } else {
-            state.errorMessage = `ログイン処理中に何らかの問題が発生しました。\n${errorCode}:${errorMessage}`;
-          }
-        });
-    };
     const logout = () => {
       if (confirm("ログアウトしますか？")) {
         signOut(auth)
@@ -83,12 +65,18 @@ export default defineComponent({
             router.push("/");
           })
           .catch((error) => {
-            state.errorMessage = error.message;
+            errorMessage.value = error.message;
           });
       }
     };
+    const deleteRequest = async (id: string) => {
+      deleteRequestInterface(id, requestList);
+    };
+    const modifyRequest = async (id: string) => {
+      modifyRequestInterface(id, requestList);
+    };
 
-    return { state, login, logout };
+    return { deleteRequest, modifyRequest, loginUserName, logout, requestList };
   },
 });
 </script>
@@ -108,68 +96,11 @@ $question-height: 2.8rem;
 .error-msg {
   color: red;
 }
-fieldset {
+.request-container {
   display: grid;
-  grid-template-rows: repeat(2, $question-height) 1fr;
-  grid-template-columns: 22rem 1fr;
-  row-gap: 2.4rem;
-  column-gap: 0.7rem;
-  width: 97%;
-  margin: 2rem auto;
-  padding: 1.6rem 2rem;
-
+  grid-template-columns: repeat(3, 3fr);
   @include mediaquery(small-size) {
-    grid-template-rows: repeat(5, $question-height);
     grid-template-columns: 1fr;
-    row-gap: 1.2rem;
-  }
-
-  label {
-    @include mediaquery(normal-size) {
-      grid-column-start: 1;
-    }
-    line-height: $question-height;
-  }
-
-  input {
-    color: inherit;
-    background-color: transparent;
-    border: 1px solid #777777;
-    transition: ease-in-out 0.2s;
-
-    &:focus {
-      outline-width: 0;
-      border-radius: 5px;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(1.5rem);
-    }
-  }
-
-  label {
-    margin-right: 0.7rem;
-    line-height: $question-height;
-  }
-
-  button {
-    grid-column-start: 2;
-    @include mediaquery(small-size) {
-      grid-column-start: 1;
-    }
-    width: fit-content;
-    height: 3rem;
-    justify-self: right;
-
-    padding: 0.2rem 0.7rem;
-    border: 2px solid #999;
-    border-radius: 5px;
-    background-color: transparent;
-    cursor: pointer;
-    &:hover,
-    &:focus {
-      outline: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(1.5rem);
-    }
   }
 }
 </style>
