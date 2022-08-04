@@ -2,7 +2,6 @@ import { Ref } from "vue";
 import {
   collection,
   doc,
-  getDoc,
   setDoc,
   deleteDoc,
   Timestamp,
@@ -33,9 +32,9 @@ export const createRequestToFirestore = async (
   const userName = await getUserName();
   if (!uid || !userName) return null;
 
-  const userRecordsRef = doc(db, "users", uid);
-  const userSnap = await getDoc(userRecordsRef);
-  if (!userSnap.exists()) return null;
+  // const userRecordsRef = doc(db, "users", uid);
+  // const userSnap = await getDoc(userRecordsRef);
+  // if (!userSnap.exists()) return null;
   const currentDate = Timestamp.now();
   const newRequestRef = doc(collection(db, "requests")).withConverter(
     requestConverter
