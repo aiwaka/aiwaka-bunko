@@ -1,6 +1,6 @@
 <template>
   <router-link :to="`/contents/${item.urlStr}`">
-    <div class="document-item">
+    <div class="document-item" :class="{ 'favorite-item': favorite }">
       <div class="item-title">{{ item.title }}</div>
       <div class="item-update">last update : {{ item.postDateAsString() }}</div>
     </div>
@@ -17,6 +17,10 @@ export default defineComponent({
       type: Object as PropType<DocumentContent>,
       required: true,
     },
+    favorite: {
+      type: Boolean,
+      required: true,
+    },
   },
 });
 </script>
@@ -28,6 +32,12 @@ export default defineComponent({
   backdrop-filter: blur(1.5rem);
   margin: 1rem 1.6rem;
   padding: 1rem 1.8rem;
+  &.favorite-item {
+    background-color: rgba($color: orange, $alpha: 0.3);
+    &:hover {
+      background-color: rgba($color: orange, $alpha: 0.6);
+    }
+  }
   &:first-child {
     margin-top: 0;
   }
