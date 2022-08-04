@@ -1,6 +1,7 @@
 import { QueryDocumentSnapshot, SnapshotOptions } from "@firebase/firestore";
 import { DocumentContent } from "@/modules/document-content";
 import { DocumentRequest } from "@/modules/document-requests";
+import { FavoriteDocumentRelation } from "@/modules/favorite-documents";
 
 export const documentConverter = {
   toFirestore: (document: DocumentContent) => {
@@ -57,6 +58,30 @@ export const requestConverter = {
       data.time,
       data.message,
       data.status
+    );
+  },
+};
+
+export const favoriteDocumentConverter = {
+  toFirestore: (doc: FavoriteDocumentRelation) => {
+    return {
+      uid: doc.uid,
+      userName: doc.userName,
+      docId: doc.docId,
+      docName: doc.docName,
+    };
+  },
+  fromFirestore: (
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions
+  ): FavoriteDocumentRelation => {
+    const data = snapshot.data(options);
+    return new FavoriteDocumentRelation(
+      snapshot.id,
+      data.uid,
+      data.userName,
+      data.docId,
+      data.docName
     );
   },
 };
