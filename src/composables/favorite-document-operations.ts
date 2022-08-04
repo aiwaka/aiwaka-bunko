@@ -107,6 +107,9 @@ export const setAllFavDocByUser = async (
   favoriteQuerySnapshot.forEach((doc) => {
     docIdList.push(doc.data().docId);
   });
+  if (docIdList.length === 0) {
+    return;
+  }
   // idリストを使ってドキュメントのリストを取得
   const documentQuery = query(
     collection(db, "files"),
