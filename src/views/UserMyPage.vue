@@ -1,6 +1,15 @@
 <template>
   <div class="user-mypage">
     <h1>{{ loginUserName }}</h1>
+    <h2>お気に入り文書一覧</h2>
+    <div class="favorite-doc-container">
+      <contents-list-item-vue
+        v-for="doc in favDocList"
+        :key="doc.urlStr"
+        :item="doc"
+        :favorite="true"
+      />
+    </div>
     <!-- TODO: 自分のページにはソート機能がほしいかも -->
     <h2>リクエスト一覧</h2>
     <div class="request-container">
@@ -31,20 +40,25 @@ import {
   setAllRequestByUser,
   modifyRequestInterface,
 } from "@/composables/request-record-operations";
+import { DocumentContent } from "@/modules/document-content";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
+import ContentsListItemVue from "@/components/ContentsListItem.vue";
+import { setAllFavDocByUser } from "@/composables/favorite-document-operations";
 
 interface State {
   errorMessage: string;
+  favDocList: DocumentContent[];
   loginUserName: string;
   requestList: DocumentRequest[];
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue },
+  components: { RequestBudgeVue, ContentsListItemVue },
   setup() {
-    const { errorMessage, loginUserName, requestList } = toRefs(
+    const { errorMessage, favDocList, loginUserName, requestList } = toRefs(
       reactive<State>({
         errorMessage: "",
+        favDocList: [],
         loginUserName: "",
         requestList: [],
       })
@@ -55,6 +69,8 @@ export default defineComponent({
       const userName = await getUserName();
       if (userName) {
         loginUserName.value = userName;
+        // お気に入り情報を取得
+        await setAllFavDocByUser(favDocList);
         // リクエスト情報を取得
         await setAllRequestByUser(requestList);
       }
@@ -78,7 +94,14 @@ export default defineComponent({
       modifyRequestInterface(id, requestList);
     };
 
-    return { deleteRequest, modifyRequest, loginUserName, logout, requestList };
+    return {
+      deleteRequest,
+      favDocList,
+      modifyRequest,
+      loginUserName,
+      logout,
+      requestList,
+    };
   },
 });
 </script>
@@ -90,6 +113,15 @@ $question-height: 2.8rem;
 .login-name-display {
   width: 80%;
   margin: 16px auto;
+}
+
+.favorite-doc-container {
+  display: grid;
+  grid-template-columns: repeat(3, 3fr);
+  margin: 2rem 3%;
+  @include mediaquery(small-size) {
+    grid-template-columns: repeat(2, 2fr);
+  }
 }
 
 .error-exist {
