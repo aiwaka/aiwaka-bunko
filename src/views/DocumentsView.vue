@@ -97,7 +97,7 @@ import { DocumentRequest, requestTypeStr } from "@/modules/document-requests";
 import {
   createRequestToFirestore,
   deleteRequestInterface,
-  getRequestByUserAndTarget,
+  setRequestByUserAndTarget,
   modifyRequestInterface,
 } from "@/composables/request-record-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
@@ -135,7 +135,7 @@ export default defineComponent({
       documentItem.value = item;
 
       // リクエスト情報を取得
-      await getRequestByUserAndTarget(requestList, props.urlStr);
+      await setRequestByUserAndTarget(requestList, props.urlStr);
     });
 
     const addButtonDisabled = computed(() => {

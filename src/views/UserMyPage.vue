@@ -28,7 +28,7 @@ import { getUserName } from "@/composables/user-record-operations";
 import { DocumentRequest } from "@/modules/document-requests";
 import {
   deleteRequestInterface,
-  getAllRequestByUser,
+  setAllRequestByUser,
   modifyRequestInterface,
 } from "@/composables/request-record-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
@@ -56,7 +56,7 @@ export default defineComponent({
       if (userName) {
         loginUserName.value = userName;
         // リクエスト情報を取得
-        await getAllRequestByUser(requestList);
+        await setAllRequestByUser(requestList);
       }
     });
 

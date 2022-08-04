@@ -58,7 +58,7 @@ export const createRequestToFirestore = async (
 ///////////////
 // read
 ///////////////
-export const getAllRequestByUser = async (
+export const setAllRequestByUser = async (
   requestList: Ref<DocumentRequest[]>
 ) => {
   // あるユーザーに対するリクエストをすべて取得する.
@@ -76,7 +76,7 @@ export const getAllRequestByUser = async (
   });
 };
 
-export const getRequestByUserAndTarget = async (
+export const setRequestByUserAndTarget = async (
   requestList: Ref<DocumentRequest[]>,
   target: string
 ) => {
