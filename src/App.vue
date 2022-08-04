@@ -1,4 +1,15 @@
 <template>
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+    <symbol
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="-100 -100 200 200"
+      id="star-symbol"
+    >
+      <polygon
+        points="0,-100 29.39,-40.45 95.11,-30.9 47.55,15.45 58.78,80.90 0,50 -58.78,80.9 -47.55,15.45 -95.11,-30.9 -29.39,-40.45"
+      />
+    </symbol>
+  </svg>
   <site-header-vue />
   <section id="view-container">
     <router-view />
