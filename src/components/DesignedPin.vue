@@ -1,11 +1,9 @@
 <template>
   <div class="designed-pin">
-    <div class="pin-body">
-      <div class="pin" :class="{ 'active-pin': active }">
-        <svg class="star-icon" :class="{ 'active-pin': active }">
-          <use xlink:href="#star-symbol" href="#star-symbol" />
-        </svg>
-      </div>
+    <div class="pin" :class="{ 'active-pin': active }">
+      <svg class="star-icon" :class="{ 'active-pin': active }">
+        <use xlink:href="#star-symbol" href="#star-symbol" />
+      </svg>
     </div>
   </div>
 </template>
@@ -29,7 +27,7 @@ export default defineComponent({
   padding: 0px;
 }
 
-.pin-body {
+.designed-pin {
   position: relative;
   width: 40px;
 }
