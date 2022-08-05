@@ -11,6 +11,13 @@
     </symbol>
   </svg>
   <site-header-vue />
+  <!-- <svg width="400" height="400" viewBox="-200 -200 400 400">
+    <circle cx="0" cy="0" r="200" fill="red" />
+    <circle cx="0" cy="-40" r="150" fill="white" />
+    <ellipse cx="60" cy="-80" rx="35" ry="60" fill="black" />
+    <ellipse cx="-60" cy="-80" rx="35" ry="60" fill="black" />
+    <ellipse cx="0" cy="40" rx="10" ry="20" fill="black" />
+  </svg> -->
   <section id="view-container">
     <router-view />
   </section>
