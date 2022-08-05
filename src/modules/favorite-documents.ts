@@ -9,7 +9,7 @@ interface FavoriteDocumentRelationWithoutId {
  * @param id idの指定
  * @param obj idだけ含まず他の要素はすべて含むオブジェクト
  */
-export const makeFavoriteDocumentRelation = (
+export const makeFavDocRelation = (
   id: string,
   obj: FavoriteDocumentRelationWithoutId
 ): FavoriteDocumentRelation => {

@@ -1,7 +1,7 @@
 import { DocumentContent } from "@/modules/document-content";
 import {
   FavoriteDocumentRelation,
-  makeFavoriteDocumentRelation,
+  makeFavDocRelation,
 } from "@/modules/favorite-documents";
 import { db, getCurrentUser } from "@/settings/firebase";
 import {
@@ -44,7 +44,7 @@ export const createFavoriteToFirestore = async (
   };
   await setDoc(newRequestRef, newRequestData);
   // リロードなしで使えるようにする.
-  const newRec = makeFavoriteDocumentRelation(newRequestRef.id, newRequestData);
+  const newRec = makeFavDocRelation(newRequestRef.id, newRequestData);
   return newRec;
 };
 
