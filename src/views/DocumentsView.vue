@@ -17,18 +17,27 @@
       </template>
       <h2>ダウンロード</h2>
       <div class="button-container">
-        <button
+        <button-ui-vue
           class="download-button"
-          @click="openFileAsNewTab($props.urlStr)"
+          :click-callback="downloadOpenTab"
         >
           新しいタブで開く
-        </button>
-        <button
-          class="download-button"
-          @click="downloadDocument($props.urlStr)"
-        >
-          ダウンロード
-        </button>
+        </button-ui-vue>
+        <button-ui-vue class="download-button" :click-callback="downloadDirect">
+          ファイルをダウンロード
+        </button-ui-vue>
+      </div>
+
+      <h2>お気に入り登録</h2>
+      <div class="favorite-container">
+        <designed-pin-vue
+          @click="toggleFavorite"
+          class="favorite-pin"
+          :active="favoriteDoc"
+        />
+        <div class="favorite-status-text">
+          <span v-if="favoriteDoc">登録済み</span>
+        </div>
       </div>
 
       <h2>リクエスト</h2>
@@ -61,13 +70,13 @@
             placeholder="message"
             v-model="newRequestMessage"
           />
-          <button
+          <button-ui-vue
             class="add-button"
-            @click.prevent="addRequest"
+            :click-callback="addRequest"
             :disabled="addButtonDisabled"
           >
             追加
-          </button>
+          </button-ui-vue>
         </fieldset>
       </div>
       <h3>これまでのリクエスト一覧</h3>
@@ -86,7 +95,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
-
 import { DocumentContent } from "@/modules/document-content";
 import { getOneContent } from "@/composables/get-contents";
 import {
@@ -97,20 +105,28 @@ import { DocumentRequest, requestTypeStr } from "@/modules/document-requests";
 import {
   createRequestToFirestore,
   deleteRequestInterface,
-  getRequestByUserAndTarget,
+  setRequestByUserAndTarget,
   modifyRequestInterface,
 } from "@/composables/request-record-operations";
+import {
+  createFavoriteToFirestore,
+  deleteFavoriteFromFirestore,
+  getIfDocInFavorite,
+} from "@/composables/favorite-document-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
+import DesignedPinVue from "@/components/DesignedPin.vue";
+import ButtonUiVue from "@/components/ButtonUi.vue";
 
 interface State {
   documentItem: DocumentContent | null;
+  favoriteDoc: boolean;
   newRequestMessage: string;
   newRequestType: number;
   requestList: DocumentRequest[];
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue },
+  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue },
 
   props: {
     urlStr: {
@@ -120,23 +136,45 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { documentItem, newRequestMessage, newRequestType, requestList } =
-      toRefs(
-        reactive<State>({
-          documentItem: null,
-          newRequestMessage: "",
-          newRequestType: 0,
-          requestList: [],
-        })
-      );
+    const {
+      documentItem,
+      favoriteDoc,
+      newRequestMessage,
+      newRequestType,
+      requestList,
+    } = toRefs(
+      reactive<State>({
+        documentItem: null,
+        favoriteDoc: false,
+        newRequestMessage: "",
+        newRequestType: 0,
+        requestList: [],
+      })
+    );
     onMounted(async () => {
       // 文書情報を取得
       const item = await getOneContent(props.urlStr);
       documentItem.value = item;
 
       // リクエスト情報を取得
-      await getRequestByUserAndTarget(requestList, props.urlStr);
+      await setRequestByUserAndTarget(requestList, props.urlStr);
+
+      // お気に入りかどうか取得
+      const favFlag = await getIfDocInFavorite(props.urlStr);
+      if (favFlag === undefined) {
+        console.log("error: favorite flag is undefined.");
+      } else {
+        favoriteDoc.value = favFlag;
+      }
     });
+
+    // ダウンロードする関数を包んで引数なしの関数を作りコールバックとして渡す.
+    const downloadOpenTab = () => {
+      openFileAsNewTab(props.urlStr);
+    };
+    const downloadDirect = () => {
+      downloadDocument(props.urlStr);
+    };
 
     const addButtonDisabled = computed(() => {
       return newRequestType.value !== 2 && newRequestMessage.value === "";
@@ -162,10 +200,29 @@ export default defineComponent({
     };
 
     const modifyRequest = async (id: string) => {
-      modifyRequestInterface(id, requestList);
+      await modifyRequestInterface(id, requestList);
     };
     const deleteRequest = async (id: string) => {
-      deleteRequestInterface(id, requestList);
+      await deleteRequestInterface(id, requestList);
+    };
+
+    // 一つでもあればfavに入っているので, 作るときはひとつ作り, 消すときはすべて消すようにする.
+    const addToFavorite = () => {
+      if (documentItem.value !== null) {
+        createFavoriteToFirestore(props.urlStr, documentItem.value.title);
+        favoriteDoc.value = true;
+      }
+    };
+    const removeFromFavorite = () => {
+      deleteFavoriteFromFirestore(props.urlStr);
+      favoriteDoc.value = false;
+    };
+    const toggleFavorite = () => {
+      if (favoriteDoc.value) {
+        removeFromFavorite();
+      } else {
+        addToFavorite();
+      }
     };
 
     return {
@@ -173,13 +230,15 @@ export default defineComponent({
       addRequest,
       deleteRequest,
       documentItem,
-      downloadDocument,
+      downloadDirect,
+      downloadOpenTab,
+      favoriteDoc,
       modifyRequest,
       newRequestMessage,
       newRequestType,
-      openFileAsNewTab,
       requestList,
       requestTypeStr,
+      toggleFavorite,
     };
   },
 });
@@ -193,22 +252,26 @@ h1 {
 }
 
 .button-container {
+  display: flex;
   margin: 1.2rem 1rem;
-}
-.download-button {
-  padding: 0.5rem 0.8rem;
-  border: 2px solid rgb(100, 200, 255);
-  border-radius: 8px;
-  transition: 0.25s ease-out;
-  &:hover {
-    color: #333333;
-    background-color: rgb(100, 200, 255);
-    border: 2px solid rgb(172, 255, 244);
+  .download-button {
+    margin: auto 1rem;
   }
 }
 
-// todo: このあたりの登録フォーム等を使いまわしているデザイン定義を他に移す
-// todo: そもそも重複しているロジックをmixin等に移す？
+.favorite-container {
+  display: flex;
+  padding: 0.5rem auto;
+  .favorite-status-text {
+    margin-left: 0.8rem;
+    span {
+      color: rgba(orange, 0.8);
+    }
+  }
+}
+
+// TODO: このあたりの登録フォーム等を使いまわしているデザイン定義を他に移す
+// そもそも重複しているロジックをmixin等に移す？
 fieldset.add-request-form-field {
   $item-height: 2.8rem;
 
@@ -263,26 +326,12 @@ fieldset.add-request-form-field {
     }
   }
 
-  button {
+  .add-button {
     grid-column-start: 2;
     @include mediaquery(small-size) {
       grid-column-start: 1;
     }
-    width: fit-content;
-    height: 3rem;
     justify-self: right;
-
-    padding: 0.2rem 0.7rem;
-    border: 2px solid #999;
-    border-radius: 5px;
-    background-color: transparent;
-    cursor: pointer;
-    &:hover,
-    &:focus {
-      outline: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(1.5rem);
-    }
   }
 }
 
