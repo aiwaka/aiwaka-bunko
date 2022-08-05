@@ -24,7 +24,7 @@
     </div>
 
     <h2>ログアウト</h2>
-    <button @click="logout">Logout</button>
+    <button-ui-vue :click-callback="logout">ログアウト</button-ui-vue>
   </div>
 </template>
 
@@ -44,6 +44,7 @@ import { DocumentContent } from "@/modules/document-content";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
 import ContentsListItemVue from "@/components/ContentsListItem.vue";
 import { setAllFavDocByUser } from "@/composables/favorite-document-operations";
+import ButtonUiVue from "@/components/ButtonUi.vue";
 
 interface State {
   errorMessage: string;
@@ -53,7 +54,7 @@ interface State {
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue, ContentsListItemVue },
+  components: { RequestBudgeVue, ContentsListItemVue, ButtonUiVue },
   setup() {
     const { errorMessage, favDocList, loginUserName, requestList } = toRefs(
       reactive<State>({
