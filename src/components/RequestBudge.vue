@@ -12,12 +12,15 @@
     </div>
     <div class="button-container">
       <template v-if="request.status === 0">
-        <button @click="modifyRequest" v-if="request.requestType !== 2">
+        <button-ui-vue
+          :click-callback="modifyRequest"
+          v-if="request.requestType !== 2"
+        >
           修正する
-        </button>
+        </button-ui-vue>
       </template>
       <template v-if="request.status !== 1">
-        <button @click="deleteRequest">取り消す</button>
+        <button-ui-vue :click-callback="deleteRequest">取り消す</button-ui-vue>
       </template>
     </div>
   </div>
@@ -26,8 +29,10 @@
 <script lang="ts">
 import { computed, defineComponent, PropType } from "vue";
 import { DocumentRequest } from "@/modules/document-requests";
+import ButtonUiVue from "./ButtonUi.vue";
 
 export default defineComponent({
+  components: { ButtonUiVue },
   props: {
     request: {
       type: Object as PropType<DocumentRequest>,
