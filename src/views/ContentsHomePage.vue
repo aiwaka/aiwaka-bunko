@@ -7,6 +7,7 @@
         v-for="doc in documentList"
         :key="doc.urlStr"
         :item="doc"
+        :favorite="favDocIdList.includes(doc.urlStr)"
       />
     </div>
   </div>
@@ -17,28 +18,32 @@ import { defineComponent, onMounted, reactive, toRefs } from "vue";
 import { DocumentContent } from "@/modules/document-content";
 import { getAllContents } from "@/composables/get-contents";
 import ContentsListItemVue from "@/components/ContentsListItem.vue";
+import { setAllFavDocIdListByUser } from "@/composables/favorite-document-operations";
 
 interface State {
   allDocumentNum: number;
   documentList: DocumentContent[];
+  favDocIdList: string[];
 }
 
 export default defineComponent({
   components: { ContentsListItemVue },
   setup() {
-    const { allDocumentNum, documentList } = toRefs(
+    const { allDocumentNum, documentList, favDocIdList } = toRefs(
       reactive<State>({
         allDocumentNum: 0,
         documentList: [],
+        favDocIdList: [],
       })
     );
-    onMounted(() => {
+    onMounted(async () => {
       getAllContents(documentList).then((docNum) => {
         allDocumentNum.value = docNum;
       });
+      await setAllFavDocIdListByUser(favDocIdList);
     });
 
-    return { allDocumentNum, documentList };
+    return { allDocumentNum, documentList, favDocIdList };
   },
 });
 </script>
