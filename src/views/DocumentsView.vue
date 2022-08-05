@@ -31,6 +31,18 @@
         </button>
       </div>
 
+      <h2>お気に入り登録</h2>
+      <div class="favorite-container">
+        <designed-pin-vue
+          @click="toggleFavorite"
+          class="favorite-pin"
+          :active="favoriteDoc"
+        />
+        <div class="favorite-status-text">
+          <span v-if="favoriteDoc">登録済み</span>
+        </div>
+      </div>
+
       <h2>リクエスト</h2>
       <p>
         文書の修正等を行いたい場合は、ここでリクエストを行ってください。
@@ -100,17 +112,24 @@ import {
   setRequestByUserAndTarget,
   modifyRequestInterface,
 } from "@/composables/request-record-operations";
+import {
+  createFavoriteToFirestore,
+  deleteFavoriteFromFirestore,
+  getIfDocInFavorite,
+} from "@/composables/favorite-document-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
+import DesignedPinVue from "@/components/DesignedPin.vue";
 
 interface State {
   documentItem: DocumentContent | null;
+  favoriteDoc: boolean;
   newRequestMessage: string;
   newRequestType: number;
   requestList: DocumentRequest[];
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue },
+  components: { RequestBudgeVue, DesignedPinVue },
 
   props: {
     urlStr: {
@@ -120,15 +139,21 @@ export default defineComponent({
   },
 
   setup(props) {
-    const { documentItem, newRequestMessage, newRequestType, requestList } =
-      toRefs(
-        reactive<State>({
-          documentItem: null,
-          newRequestMessage: "",
-          newRequestType: 0,
-          requestList: [],
-        })
-      );
+    const {
+      documentItem,
+      favoriteDoc,
+      newRequestMessage,
+      newRequestType,
+      requestList,
+    } = toRefs(
+      reactive<State>({
+        documentItem: null,
+        favoriteDoc: false,
+        newRequestMessage: "",
+        newRequestType: 0,
+        requestList: [],
+      })
+    );
     onMounted(async () => {
       // 文書情報を取得
       const item = await getOneContent(props.urlStr);
@@ -136,6 +161,14 @@ export default defineComponent({
 
       // リクエスト情報を取得
       await setRequestByUserAndTarget(requestList, props.urlStr);
+
+      // お気に入りかどうか取得
+      const favFlag = await getIfDocInFavorite(props.urlStr);
+      if (favFlag === undefined) {
+        console.log("error: favorite flag is undefined.");
+      } else {
+        favoriteDoc.value = favFlag;
+      }
     });
 
     const addButtonDisabled = computed(() => {
@@ -162,10 +195,29 @@ export default defineComponent({
     };
 
     const modifyRequest = async (id: string) => {
-      modifyRequestInterface(id, requestList);
+      await modifyRequestInterface(id, requestList);
     };
     const deleteRequest = async (id: string) => {
-      deleteRequestInterface(id, requestList);
+      await deleteRequestInterface(id, requestList);
+    };
+
+    // 一つでもあればfavに入っているので, 作るときはひとつ作り, 消すときはすべて消すようにする.
+    const addToFavorite = () => {
+      if (documentItem.value !== null) {
+        createFavoriteToFirestore(props.urlStr, documentItem.value.title);
+        favoriteDoc.value = true;
+      }
+    };
+    const removeFromFavorite = () => {
+      deleteFavoriteFromFirestore(props.urlStr);
+      favoriteDoc.value = false;
+    };
+    const toggleFavorite = () => {
+      if (favoriteDoc.value) {
+        removeFromFavorite();
+      } else {
+        addToFavorite();
+      }
     };
 
     return {
@@ -174,12 +226,14 @@ export default defineComponent({
       deleteRequest,
       documentItem,
       downloadDocument,
+      favoriteDoc,
       modifyRequest,
       newRequestMessage,
       newRequestType,
       openFileAsNewTab,
       requestList,
       requestTypeStr,
+      toggleFavorite,
     };
   },
 });
@@ -204,6 +258,17 @@ h1 {
     color: #333333;
     background-color: rgb(100, 200, 255);
     border: 2px solid rgb(172, 255, 244);
+  }
+}
+
+.favorite-container {
+  display: flex;
+  padding: 0.5rem auto;
+  .favorite-status-text {
+    margin-left: 0.8rem;
+    span {
+      color: rgba(orange, 0.8);
+    }
   }
 }
 

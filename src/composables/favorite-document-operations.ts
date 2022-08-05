@@ -6,13 +6,13 @@ import {
 import { db, getCurrentUser } from "@/settings/firebase";
 import {
   collection,
-  deleteDoc,
   doc,
   documentId,
   getDocs,
   query,
   setDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { Ref } from "vue";
 import {
@@ -122,38 +122,63 @@ export const setAllFavDocByUser = async (
 };
 
 /**
- * 指定された文書が現在のユーザーのお気に入りに入っているかをVueの変数にセットする.
- * @param docId
- * @param favorite
- * @returns
+ * 指定された文書が現在のユーザーのお気に入りに入っているかを返す
+ * @param docId - 文書id（urlと一致）
+ * @returns - 指定された文書が現在のユーザーのお気に入りに入っているかのbool
  */
-// export const setIfDocumentInFavorite = async (
-//   docId: string,
-//   favorite: Ref<boolean>,
-// ) => {
-//   const user = await getCurrentUser();
-//   const uid = user?.uid;
-//   if (!uid) return;
+export const getIfDocInFavorite = async (docId: string) => {
+  const user = await getCurrentUser();
+  const uid = user?.uid;
+  if (!uid) return;
 
-//   const favoriteQuery = query(
-//     collection(db, "favoriteDocuments"),
-//     where("uid", "==", uid),
-//     where("docId", "==", docId)
-//   ).withConverter(favoriteDocumentConverter);
-//   const querySnapshot = await getDocs(favoriteQuery);
-//   let result = false;
-//   querySnapshot.forEach((doc) => {
-//   });
-// };
+  const favoriteQuery = query(
+    collection(db, "favoriteDocuments"),
+    where("uid", "==", uid),
+    where("docId", "==", docId)
+  ).withConverter(favoriteDocumentConverter);
+  const querySnapshot = await getDocs(favoriteQuery);
+  return querySnapshot.docs.length !== 0;
+};
 
 ///////////////
 // delete
 ///////////////
+/**
+ * お気に入りのコレクションからuidとdocIdが一致するドキュメントをすべて削除する
+ * @param docId - 文書id（urlと一致）
+ */
 export const deleteFavoriteFromFirestore = async (
-  relationId: string
+  docId: string
 ): Promise<void | null> => {
   const user = await getCurrentUser();
   const uid = user?.uid;
   if (!uid) return null;
-  await deleteDoc(doc(db, "favoriteDocuments", relationId));
+
+  const favoriteQuery = query(
+    collection(db, "favoriteDocuments"),
+    where("uid", "==", uid),
+    where("docId", "==", docId)
+  ).withConverter(favoriteDocumentConverter);
+  const favoriteQuerySnapshot = await getDocs(favoriteQuery);
+
+  const batch = writeBatch(db);
+  favoriteQuerySnapshot.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
+
+  /*
+   * 以下はどれだけ削除すべきものが多くてもうまくできるための措置.
+   * 必要になることは無いと思われるので一旦コメントアウト
+   */
+  // const batch = writeBatch(db);
+  // const MAX_WRITES_PER_BATCH = 500;
+  // const docs = favoriteQuerySnapshot.docs;
+  // const commitBatchPromises = [];
+  // for (let i = 0; i < docs.length; i += MAX_WRITES_PER_BATCH) {
+  //   const chunk = docs.slice(i, i + MAX_WRITES_PER_BATCH);
+  //   chunk.forEach((doc) => batch.delete(doc.ref));
+  //   commitBatchPromises.push(batch.commit());
+  // }
+  // await Promise.all(commitBatchPromises);
 };
