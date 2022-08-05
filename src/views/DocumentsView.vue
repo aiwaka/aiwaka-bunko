@@ -17,18 +17,15 @@
       </template>
       <h2>ダウンロード</h2>
       <div class="button-container">
-        <button
+        <button-ui-vue
           class="download-button"
-          @click="openFileAsNewTab($props.urlStr)"
+          :click-callback="downloadOpenTab"
         >
           新しいタブで開く
-        </button>
-        <button
-          class="download-button"
-          @click="downloadDocument($props.urlStr)"
-        >
-          ダウンロード
-        </button>
+        </button-ui-vue>
+        <button-ui-vue class="download-button" :click-callback="downloadDirect">
+          ファイルをダウンロード
+        </button-ui-vue>
       </div>
 
       <h2>お気に入り登録</h2>
@@ -73,13 +70,13 @@
             placeholder="message"
             v-model="newRequestMessage"
           />
-          <button
+          <button-ui-vue
             class="add-button"
-            @click.prevent="addRequest"
+            :click-callback="addRequest"
             :disabled="addButtonDisabled"
           >
             追加
-          </button>
+          </button-ui-vue>
         </fieldset>
       </div>
       <h3>これまでのリクエスト一覧</h3>
@@ -98,7 +95,6 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from "vue";
-
 import { DocumentContent } from "@/modules/document-content";
 import { getOneContent } from "@/composables/get-contents";
 import {
@@ -119,6 +115,7 @@ import {
 } from "@/composables/favorite-document-operations";
 import RequestBudgeVue from "@/components/RequestBudge.vue";
 import DesignedPinVue from "@/components/DesignedPin.vue";
+import ButtonUiVue from "@/components/ButtonUi.vue";
 
 interface State {
   documentItem: DocumentContent | null;
@@ -129,7 +126,7 @@ interface State {
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue, DesignedPinVue },
+  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue },
 
   props: {
     urlStr: {
@@ -170,6 +167,14 @@ export default defineComponent({
         favoriteDoc.value = favFlag;
       }
     });
+
+    // ダウンロードする関数を包んで引数なしの関数を作りコールバックとして渡す.
+    const downloadOpenTab = () => {
+      openFileAsNewTab(props.urlStr);
+    };
+    const downloadDirect = () => {
+      downloadDocument(props.urlStr);
+    };
 
     const addButtonDisabled = computed(() => {
       return newRequestType.value !== 2 && newRequestMessage.value === "";
@@ -225,12 +230,12 @@ export default defineComponent({
       addRequest,
       deleteRequest,
       documentItem,
-      downloadDocument,
+      downloadDirect,
+      downloadOpenTab,
       favoriteDoc,
       modifyRequest,
       newRequestMessage,
       newRequestType,
-      openFileAsNewTab,
       requestList,
       requestTypeStr,
       toggleFavorite,
@@ -247,17 +252,10 @@ h1 {
 }
 
 .button-container {
+  display: flex;
   margin: 1.2rem 1rem;
-}
-.download-button {
-  padding: 0.5rem 0.8rem;
-  border: 2px solid rgb(100, 200, 255);
-  border-radius: 8px;
-  transition: 0.25s ease-out;
-  &:hover {
-    color: #333333;
-    background-color: rgb(100, 200, 255);
-    border: 2px solid rgb(172, 255, 244);
+  .download-button {
+    margin: auto 1rem;
   }
 }
 
@@ -272,8 +270,8 @@ h1 {
   }
 }
 
-// todo: このあたりの登録フォーム等を使いまわしているデザイン定義を他に移す
-// todo: そもそも重複しているロジックをmixin等に移す？
+// TODO: このあたりの登録フォーム等を使いまわしているデザイン定義を他に移す
+// そもそも重複しているロジックをmixin等に移す？
 fieldset.add-request-form-field {
   $item-height: 2.8rem;
 
@@ -328,26 +326,12 @@ fieldset.add-request-form-field {
     }
   }
 
-  button {
+  .add-button {
     grid-column-start: 2;
     @include mediaquery(small-size) {
       grid-column-start: 1;
     }
-    width: fit-content;
-    height: 3rem;
     justify-self: right;
-
-    padding: 0.2rem 0.7rem;
-    border: 2px solid #999;
-    border-radius: 5px;
-    background-color: transparent;
-    cursor: pointer;
-    &:hover,
-    &:focus {
-      outline: none;
-      background-color: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(1.5rem);
-    }
   }
 }
 
