@@ -42,9 +42,21 @@
         <li>文書のお気に入りリスト機能を追加</li>
         <li>ボタンデザインの変更</li>
       </ul>
+      <li>
+        2022.10.04：直近一週間以内に更新された文書に<new-item-icon-vue />アイコンがつく機能を追加.
+      </li>
     </ul>
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import NewItemIconVue from "@/components/NewItemIcon.vue";
+
+export default defineComponent({
+  components: { NewItemIconVue },
+});
+</script>
 
 <style lang="scss" scoped>
 .home {

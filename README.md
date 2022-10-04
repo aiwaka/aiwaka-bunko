@@ -20,6 +20,7 @@
 - リクエストが受理されたかどうかもひと目で分かるようになっている.
 - ユーザーページを追加し, 自分のリクエスト一覧を閲覧・編集できるようになった.
 - 文書のお気に入りリスト機能. 各文書ページでお気に入りにチェックを入れればユーザーページに一覧が表示される他, コンテンツ一覧ページでもハイライトされる.
+- 直近一週間に更新された文書にアイコンがつくようになった.
 
 ## ギャラリー
 
@@ -69,7 +70,7 @@
 ## テストサーバー起動方法
 
 ```
-npm install
+yarn install
 ```
 
 でセットアップ可能.
@@ -77,13 +78,13 @@ npm install
 ### Compiles and hot-reloads for development
 
 ```
-npm run serve
+yarn serve
 ```
 
 ### Compiles and minifies for production
 
 ```
-npm run build
+yarn build
 ```
 
 ## メモ

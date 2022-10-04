@@ -2,7 +2,12 @@
   <router-link :to="`/contents/${item.urlStr}`">
     <div class="document-item" :class="{ 'favorite-item': favorite }">
       <div class="item-title">{{ item.title }}</div>
-      <div class="item-update">last update : {{ item.postDateAsString() }}</div>
+      <div class="item-update">
+        <span class="update-date-string">
+          last update : {{ item.postDateAsString() }}
+        </span>
+        <new-item-icon-vue v-if="item.update.toDate() > lastWeekDate" />
+      </div>
     </div>
   </router-link>
 </template>
@@ -10,9 +15,15 @@
 <script lang="ts">
 import { DocumentContent } from "@/modules/document-content";
 import { defineComponent, PropType } from "vue";
+import NewItemIconVue from "@/components/NewItemIcon.vue";
 
 export default defineComponent({
+  components: { NewItemIconVue },
   props: {
+    lastWeekDate: {
+      type: Object as PropType<Date>,
+      required: true,
+    },
     item: {
       type: Object as PropType<DocumentContent>,
       required: true,
@@ -52,6 +63,9 @@ export default defineComponent({
   .item-update {
     font-size: 1.1rem;
     color: #888888;
+    display: flex;
+    column-gap: 1rem;
+    flex-wrap: wrap;
   }
 }
 </style>

@@ -4,6 +4,7 @@
       <h1>{{ documentItem.title }}</h1>
       <p class="update-timestamp">
         last update : {{ documentItem.postDateAsString() }}
+        <new-item-icon-vue v-if="documentItem.update.toDate() > lastWeekDate" />
       </p>
       <h2>概要</h2>
       <p>{{ documentItem.description }}</p>
@@ -116,17 +117,20 @@ import {
 import RequestBudgeVue from "@/components/RequestBudge.vue";
 import DesignedPinVue from "@/components/DesignedPin.vue";
 import ButtonUiVue from "@/components/ButtonUi.vue";
+import NewItemIconVue from "@/components/NewItemIcon.vue";
+import { setPreviousDate } from "@/composables/set-previous-date";
 
 interface State {
   documentItem: DocumentContent | null;
   favoriteDoc: boolean;
+  lastWeekDate: Date;
   newRequestMessage: string;
   newRequestType: number;
   requestList: DocumentRequest[];
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue },
+  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue, NewItemIconVue },
 
   props: {
     urlStr: {
@@ -139,6 +143,7 @@ export default defineComponent({
     const {
       documentItem,
       favoriteDoc,
+      lastWeekDate,
       newRequestMessage,
       newRequestType,
       requestList,
@@ -146,12 +151,14 @@ export default defineComponent({
       reactive<State>({
         documentItem: null,
         favoriteDoc: false,
+        lastWeekDate: new Date(),
         newRequestMessage: "",
         newRequestType: 0,
         requestList: [],
       })
     );
     onMounted(async () => {
+      setPreviousDate(lastWeekDate.value);
       // 文書情報を取得
       const item = await getOneContent(props.urlStr);
       documentItem.value = item;
@@ -233,6 +240,7 @@ export default defineComponent({
       downloadDirect,
       downloadOpenTab,
       favoriteDoc,
+      lastWeekDate,
       modifyRequest,
       newRequestMessage,
       newRequestType,
