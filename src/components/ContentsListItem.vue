@@ -6,9 +6,7 @@
         <span class="update-date-string">
           last update : {{ item.postDateAsString() }}
         </span>
-        <span class="new-item-icon" v-if="item.update.toDate() > lastWeekDate">
-          NEW!
-        </span>
+        <new-item-icon-vue v-if="item.update.toDate() > lastWeekDate" />
       </div>
     </div>
   </router-link>
@@ -17,8 +15,10 @@
 <script lang="ts">
 import { DocumentContent } from "@/modules/document-content";
 import { defineComponent, PropType } from "vue";
+import NewItemIconVue from "@/components/NewItemIcon.vue";
 
 export default defineComponent({
+  components: { NewItemIconVue },
   props: {
     lastWeekDate: {
       type: Object as PropType<Date>,
@@ -66,13 +66,6 @@ export default defineComponent({
     display: flex;
     column-gap: 1rem;
     flex-wrap: wrap;
-
-    .new-item-icon {
-      padding: 0.1rem;
-      border-radius: 3px;
-      background-color: orange;
-      color: beige;
-    }
   }
 }
 </style>

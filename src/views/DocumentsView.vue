@@ -4,12 +4,7 @@
       <h1>{{ documentItem.title }}</h1>
       <p class="update-timestamp">
         last update : {{ documentItem.postDateAsString() }}
-        <span
-          class="new-item-icon"
-          v-if="documentItem.update.toDate() > lastWeekDate"
-        >
-          NEW!
-        </span>
+        <new-item-icon-vue v-if="documentItem.update.toDate() > lastWeekDate" />
       </p>
       <h2>概要</h2>
       <p>{{ documentItem.description }}</p>
@@ -122,6 +117,7 @@ import {
 import RequestBudgeVue from "@/components/RequestBudge.vue";
 import DesignedPinVue from "@/components/DesignedPin.vue";
 import ButtonUiVue from "@/components/ButtonUi.vue";
+import NewItemIconVue from "@/components/NewItemIcon.vue";
 
 interface State {
   documentItem: DocumentContent | null;
@@ -133,7 +129,7 @@ interface State {
 }
 
 export default defineComponent({
-  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue },
+  components: { RequestBudgeVue, DesignedPinVue, ButtonUiVue, NewItemIconVue },
 
   props: {
     urlStr: {
@@ -261,12 +257,6 @@ export default defineComponent({
 
 h1 {
   font-size: 3.2rem;
-}
-.new-item-icon {
-  padding: 0.1rem;
-  border-radius: 3px;
-  background-color: orange;
-  color: beige;
 }
 
 .button-container {
