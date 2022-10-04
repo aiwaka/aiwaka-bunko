@@ -8,6 +8,7 @@
         :key="doc.urlStr"
         :item="doc"
         :favorite="true"
+        :last-week-date="lastWeekDate"
       />
     </div>
     <!-- TODO: 自分のページにはソート機能がほしいかも -->
@@ -49,6 +50,7 @@ import ButtonUiVue from "@/components/ButtonUi.vue";
 interface State {
   errorMessage: string;
   favDocList: DocumentContent[];
+  lastWeekDate: Date;
   loginUserName: string;
   requestList: DocumentRequest[];
 }
@@ -56,10 +58,17 @@ interface State {
 export default defineComponent({
   components: { RequestBudgeVue, ContentsListItemVue, ButtonUiVue },
   setup() {
-    const { errorMessage, favDocList, loginUserName, requestList } = toRefs(
+    const {
+      errorMessage,
+      favDocList,
+      lastWeekDate,
+      loginUserName,
+      requestList,
+    } = toRefs(
       reactive<State>({
         errorMessage: "",
         favDocList: [],
+        lastWeekDate: new Date(),
         loginUserName: "",
         requestList: [],
       })
@@ -67,6 +76,7 @@ export default defineComponent({
     const router = useRouter();
 
     onMounted(async () => {
+      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
       const userName = await getUserName();
       if (userName) {
         loginUserName.value = userName;
@@ -99,6 +109,7 @@ export default defineComponent({
       deleteRequest,
       favDocList,
       modifyRequest,
+      lastWeekDate,
       loginUserName,
       logout,
       requestList,
