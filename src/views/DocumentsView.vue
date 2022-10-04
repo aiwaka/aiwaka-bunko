@@ -4,6 +4,12 @@
       <h1>{{ documentItem.title }}</h1>
       <p class="update-timestamp">
         last update : {{ documentItem.postDateAsString() }}
+        <span
+          class="new-item-icon"
+          v-if="documentItem.update.toDate() > lastWeekDate"
+        >
+          NEW!
+        </span>
       </p>
       <h2>概要</h2>
       <p>{{ documentItem.description }}</p>
@@ -120,6 +126,7 @@ import ButtonUiVue from "@/components/ButtonUi.vue";
 interface State {
   documentItem: DocumentContent | null;
   favoriteDoc: boolean;
+  lastWeekDate: Date;
   newRequestMessage: string;
   newRequestType: number;
   requestList: DocumentRequest[];
@@ -139,6 +146,7 @@ export default defineComponent({
     const {
       documentItem,
       favoriteDoc,
+      lastWeekDate,
       newRequestMessage,
       newRequestType,
       requestList,
@@ -146,12 +154,15 @@ export default defineComponent({
       reactive<State>({
         documentItem: null,
         favoriteDoc: false,
+        lastWeekDate: new Date(),
         newRequestMessage: "",
         newRequestType: 0,
         requestList: [],
       })
     );
     onMounted(async () => {
+      // 一週間前の日付をセット
+      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
       // 文書情報を取得
       const item = await getOneContent(props.urlStr);
       documentItem.value = item;
@@ -233,6 +244,7 @@ export default defineComponent({
       downloadDirect,
       downloadOpenTab,
       favoriteDoc,
+      lastWeekDate,
       modifyRequest,
       newRequestMessage,
       newRequestType,
@@ -249,6 +261,12 @@ export default defineComponent({
 
 h1 {
   font-size: 3.2rem;
+}
+.new-item-icon {
+  padding: 0.1rem;
+  border-radius: 3px;
+  background-color: orange;
+  color: beige;
 }
 
 .button-container {

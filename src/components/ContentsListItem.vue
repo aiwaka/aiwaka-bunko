@@ -2,7 +2,14 @@
   <router-link :to="`/contents/${item.urlStr}`">
     <div class="document-item" :class="{ 'favorite-item': favorite }">
       <div class="item-title">{{ item.title }}</div>
-      <div class="item-update">last update : {{ item.postDateAsString() }}</div>
+      <div class="item-update">
+        <span class="update-date-string">
+          last update : {{ item.postDateAsString() }}
+        </span>
+        <span class="new-item-icon" v-if="item.update.toDate() > lastWeekDate">
+          NEW!
+        </span>
+      </div>
     </div>
   </router-link>
 </template>
@@ -13,6 +20,10 @@ import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
   props: {
+    lastWeekDate: {
+      type: Object as PropType<Date>,
+      required: true,
+    },
     item: {
       type: Object as PropType<DocumentContent>,
       required: true,
@@ -52,6 +63,16 @@ export default defineComponent({
   .item-update {
     font-size: 1.1rem;
     color: #888888;
+    display: flex;
+    column-gap: 1rem;
+    flex-wrap: wrap;
+
+    .new-item-icon {
+      padding: 0.1rem;
+      border-radius: 3px;
+      background-color: orange;
+      color: beige;
+    }
   }
 }
 </style>

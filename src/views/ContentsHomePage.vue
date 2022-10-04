@@ -6,6 +6,7 @@
       <contents-list-item-vue
         v-for="doc in documentList"
         :key="doc.urlStr"
+        :last-week-date="lastWeekDate"
         :item="doc"
         :favorite="favDocIdList.includes(doc.urlStr)"
       />
@@ -24,26 +25,30 @@ interface State {
   allDocumentNum: number;
   documentList: DocumentContent[];
   favDocIdList: string[];
+  lastWeekDate: Date;
 }
 
 export default defineComponent({
   components: { ContentsListItemVue },
   setup() {
-    const { allDocumentNum, documentList, favDocIdList } = toRefs(
+    const { allDocumentNum, documentList, favDocIdList, lastWeekDate } = toRefs(
       reactive<State>({
         allDocumentNum: 0,
         documentList: [],
         favDocIdList: [],
+        lastWeekDate: new Date(),
       })
     );
     onMounted(async () => {
+      // 一週間前の日付を各書類データに渡して更新が新しいかどうか判定
+      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
       getAllContents(documentList).then((docNum) => {
         allDocumentNum.value = docNum;
       });
       await setAllFavDocIdListByUser(favDocIdList);
     });
 
-    return { allDocumentNum, documentList, favDocIdList };
+    return { allDocumentNum, documentList, favDocIdList, lastWeekDate };
   },
 });
 </script>
