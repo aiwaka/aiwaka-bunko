@@ -42,6 +42,11 @@
         <li>文書のお気に入りリスト機能を追加</li>
         <li>ボタンデザインの変更</li>
       </ul>
+      <li>
+        2022.10.04：直近一週間以内に更新された文書に
+        <span class="new-item-icon">NEW!</span>
+        アイコンがつく機能を追加.
+      </li>
     </ul>
   </div>
 </template>
@@ -55,6 +60,12 @@
   > img {
     margin: 15px auto;
     width: 50%;
+  }
+  .new-item-icon {
+    padding: 0.1rem;
+    border-radius: 3px;
+    background-color: orange;
+    color: beige;
   }
 }
 </style>
