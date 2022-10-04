@@ -118,6 +118,7 @@ import RequestBudgeVue from "@/components/RequestBudge.vue";
 import DesignedPinVue from "@/components/DesignedPin.vue";
 import ButtonUiVue from "@/components/ButtonUi.vue";
 import NewItemIconVue from "@/components/NewItemIcon.vue";
+import { setPreviousDate } from "@/composables/set-previous-date";
 
 interface State {
   documentItem: DocumentContent | null;
@@ -157,8 +158,7 @@ export default defineComponent({
       })
     );
     onMounted(async () => {
-      // 一週間前の日付をセット
-      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
+      setPreviousDate(lastWeekDate.value);
       // 文書情報を取得
       const item = await getOneContent(props.urlStr);
       documentItem.value = item;

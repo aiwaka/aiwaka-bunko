@@ -20,6 +20,7 @@ import { DocumentContent } from "@/modules/document-content";
 import { getAllContents } from "@/composables/get-contents";
 import ContentsListItemVue from "@/components/ContentsListItem.vue";
 import { setAllFavDocIdListByUser } from "@/composables/favorite-document-operations";
+import { setPreviousDate } from "@/composables/set-previous-date";
 
 interface State {
   allDocumentNum: number;
@@ -40,8 +41,9 @@ export default defineComponent({
       })
     );
     onMounted(async () => {
-      // 一週間前の日付を各書類データに渡して更新が新しいかどうか判定
-      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
+      // 一週間前（この関数を定義しているファイルにおける定数で期間を決定している）の
+      // 日付を各書類データに渡して更新が新しいかどうか判定
+      setPreviousDate(lastWeekDate.value);
       getAllContents(documentList).then((docNum) => {
         allDocumentNum.value = docNum;
       });

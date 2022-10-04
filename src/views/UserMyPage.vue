@@ -46,6 +46,7 @@ import RequestBudgeVue from "@/components/RequestBudge.vue";
 import ContentsListItemVue from "@/components/ContentsListItem.vue";
 import { setAllFavDocByUser } from "@/composables/favorite-document-operations";
 import ButtonUiVue from "@/components/ButtonUi.vue";
+import { setPreviousDate } from "@/composables/set-previous-date";
 
 interface State {
   errorMessage: string;
@@ -76,7 +77,7 @@ export default defineComponent({
     const router = useRouter();
 
     onMounted(async () => {
-      lastWeekDate.value.setDate(lastWeekDate.value.getDate() - 7);
+      setPreviousDate(lastWeekDate.value);
       const userName = await getUserName();
       if (userName) {
         loginUserName.value = userName;
