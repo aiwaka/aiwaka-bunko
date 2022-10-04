@@ -8,6 +8,7 @@
         :key="doc.urlStr"
         :item="doc"
         :favorite="true"
+        :last-week-date="lastWeekDate"
       />
     </div>
     <!-- TODO: 自分のページにはソート機能がほしいかも -->
@@ -45,10 +46,12 @@ import RequestBudgeVue from "@/components/RequestBudge.vue";
 import ContentsListItemVue from "@/components/ContentsListItem.vue";
 import { setAllFavDocByUser } from "@/composables/favorite-document-operations";
 import ButtonUiVue from "@/components/ButtonUi.vue";
+import { setPreviousDate } from "@/composables/set-previous-date";
 
 interface State {
   errorMessage: string;
   favDocList: DocumentContent[];
+  lastWeekDate: Date;
   loginUserName: string;
   requestList: DocumentRequest[];
 }
@@ -56,10 +59,17 @@ interface State {
 export default defineComponent({
   components: { RequestBudgeVue, ContentsListItemVue, ButtonUiVue },
   setup() {
-    const { errorMessage, favDocList, loginUserName, requestList } = toRefs(
+    const {
+      errorMessage,
+      favDocList,
+      lastWeekDate,
+      loginUserName,
+      requestList,
+    } = toRefs(
       reactive<State>({
         errorMessage: "",
         favDocList: [],
+        lastWeekDate: new Date(),
         loginUserName: "",
         requestList: [],
       })
@@ -67,6 +77,7 @@ export default defineComponent({
     const router = useRouter();
 
     onMounted(async () => {
+      setPreviousDate(lastWeekDate.value);
       const userName = await getUserName();
       if (userName) {
         loginUserName.value = userName;
@@ -99,6 +110,7 @@ export default defineComponent({
       deleteRequest,
       favDocList,
       modifyRequest,
+      lastWeekDate,
       loginUserName,
       logout,
       requestList,
